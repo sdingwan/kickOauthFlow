@@ -8,11 +8,13 @@ from urllib.parse import urlencode, urlparse
 import requests
 from flask import Flask, redirect, request, session, url_for, jsonify, render_template_string
 from dotenv import load_dotenv
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", secrets.token_hex(32))
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)  # trust Railway proxy
 
 # For local HTTP dev; tweak if you run HTTPS in prod
 _is_https = (os.getenv("KICK_REDIRECT_URI", "").lower().startswith("https"))
@@ -255,10 +257,7 @@ def _render_page(page_title: str, body_html: str, slug_default: str = ""):
 
 @app.route("/")
 def index():
-    fix = _normalize_host_redirect()
-    if fix:
-        return fix
-
+    # Removed _normalize_host_redirect() here to avoid redirect loops behind proxies
     if "access_token" in session and not _is_token_expired():
         return redirect(url_for("me"))
 
@@ -311,6 +310,9 @@ def login():
 
 @app.route("/callback")
 def callback():
+    fix = _normalize_host_redirect()
+    if fix:
+        return fix
     # Validate state (if you still hit mismatch, ensure you started login on the same host as REDIRECT_URI)
     state = request.args.get("state")
     if not state or state != session.get("oauth_state"):
