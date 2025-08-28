@@ -117,44 +117,58 @@ def _render_page(page_title: str, body_html: str, slug_default: str = ""):
       <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/>
       <title>{{ title }}</title>
       <style>
-        :root { color-scheme: light dark; }
-        body { margin:0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height:1.5; }
-        header { position:sticky; top:0; background: linear-gradient(90deg, #1e293b, #0f172a); color:#fff; padding:12px 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); z-index: 10; }
-        .nav { display:flex; gap:12px; align-items:center; justify-content: space-between; max-width: 960px; margin: 0 auto; }
-        .brand { font-weight:700; letter-spacing:0.2px; }
-        .links a { color:#cbd5e1; text-decoration:none; margin-left:12px; }
-        .links a:hover { color:#fff; }
-        .search { display:flex; gap:8px; align-items:center; }
-        .search input[type=text]{ padding:8px 10px; border-radius:8px; border:1px solid #334155; min-width: 220px; }
-        .btn { padding:8px 12px; border-radius:8px; border:1px solid #334155; background:#0ea5e9; color:#06243a; font-weight:600; cursor:pointer; }
-        .btn:hover { filter:brightness(1.05); }
-        .container { max-width: 960px; margin: 20px auto; padding: 0 16px; }
-        .card { background: rgba(255,255,255,0.06); border: 1px solid rgba(148,163,184,0.4); border-radius:12px; padding:16px; }
+        :root {
+          color-scheme: dark;
+          --bg: #0f0f10;
+          --panel: #17181b;
+          --panel-2: #1d2024;
+          --border: #272a30;
+          --text: #e5e7eb;
+          --muted: #9aa4b2;
+          --accent: #53fc18;
+        }
+        html, body { height: 100%; }
+        body { margin:0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height:1.5; }
+        a { color: #cbd5e1; text-decoration: none; }
+        a:hover { color: #fff; }
+        header { position:sticky; top:0; background: rgba(15,15,16,0.9); backdrop-filter: saturate(140%) blur(8px); border-bottom:1px solid var(--border); z-index: 10; }
+        .nav { display:flex; gap:16px; align-items:center; height:64px; max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+        .brand a { display:flex; align-items:center; gap:10px; color:#fff; font-weight:800; letter-spacing:0.2px; }
+        .k-logo { display:inline-block; width:24px; height:24px; border-radius:4px; background: var(--accent); box-shadow: 0 0 24px rgba(83,252,24,0.35); }
+        .brand-name { font-size:18px; }
+        .search { display:flex; gap:8px; align-items:center; margin-left:auto; }
+        .search input[type=text]{ padding:10px 12px; border-radius:10px; border:1px solid var(--border); background: var(--panel); color: var(--text); min-width:280px; outline:none; }
+        .search input[type=text]::placeholder{ color: #7a8594; }
+        .btn { padding:10px 14px; border-radius:10px; border:1px solid #1f6d12; background: linear-gradient(180deg, var(--accent), #34d215); color:#031b07; font-weight:800; cursor:pointer; }
+        .btn:hover { filter:brightness(1.03); }
+        .links { display:flex; gap:14px; align-items:center; margin-left: 8px; }
+        .container { max-width: 1120px; margin: 24px auto; padding: 0 20px; }
+        .card { background: var(--panel); border:1px solid var(--border); border-radius:14px; padding:16px; }
         .grid { display:grid; grid-template-columns: 120px 1fr; gap:16px; }
-        img.avatar { width:120px; height:120px; border-radius:10px; object-fit:cover; border:1px solid rgba(148,163,184,0.4); }
+        img.avatar { width:120px; height:120px; border-radius:12px; object-fit:cover; border:1px solid var(--border); }
         code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; }
-        pre.pretty { padding:12px; border:1px solid #e5e7eb33; border-radius:8px; overflow:auto; }
-        .k-badge { display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; background:#16a34a; color:white; margin-left:8px; }
-        .muted { color:#94a3b8; }
-        a.clean { color:#38bdf8; text-decoration:none; }
-        a.clean:hover { text-decoration:underline; }
-        .banner { width:100%; max-height:200px; object-fit:cover; border-radius:10px; border:1px solid rgba(148,163,184,0.4); }
+        pre.pretty { padding:12px; border:1px solid var(--border); border-radius:10px; background: var(--panel-2); color: var(--text); overflow:auto; }
+        .k-badge { display:inline-block; padding:2px 10px; border-radius:999px; font-size:12px; background: var(--accent); color:#031b07; margin-left:8px; font-weight:800; }
+        .muted { color: var(--muted); }
+        a.clean { color:#9fe870; }
+        a.clean:hover { color:#c5f6a1; }
+        .banner { width:100%; max-height:220px; object-fit:cover; border-radius:12px; border:1px solid var(--border); }
+        #search-suggestions { position:absolute; left:0; right:0; top:44px; background: var(--panel); border:1px solid var(--border); border-radius:12px; display:none; max-height:320px; overflow:auto; padding:6px; z-index:9999; }
+        .sg-item { transition: background 120ms ease; }
+        .sg-item:hover { background: #1a1d22; }
+        mark { background: rgba(83,252,24,0.3); color: inherit; border-radius: 3px; padding: 0 2px; }
       </style>
     </head>
     <body>
       <header>
         <div class=\"nav\">
-          <div class=\"brand\"><a href=\"/\" class=\"clean\">Kick OAuth Demo</a></div>
-          <div style=\"position:relative;\">
+          <div class=\"brand\"><a href=\"/\"><span class=\"k-logo\"></span><span class=\"brand-name\">KICK</span></a></div>
+          <div style=\"position:relative; flex:1; max-width:540px;\">
             <form class=\"search\" action=\"/channels/search\" method=\"get\" autocomplete=\"off\">
-              <input id=\"global-search\" type=\"text\" name=\"slug\" placeholder=\"Search channel slug...\" value=\"{{ slug or '' }}\"/>
+              <input id=\"global-search\" type=\"text\" name=\"slug\" placeholder=\"Search channels\" value=\"{{ slug or '' }}\"/>
               <button class=\"btn\" type=\"submit\">Search</button>
             </form>
-            <div id=\"search-suggestions\" style=\"
-              position:absolute; left:0; right:0; top:40px;
-              background: rgba(17,24,39,0.98); border:1px solid #334155; border-radius:10px;
-              display:none; max-height:320px; overflow:auto; padding:6px; z-index:9999;
-            \"></div>
+            <div id=\"search-suggestions\"></div>
           </div>
           <nav class=\"links\">
             <a href=\"/\">Home</a>
